@@ -44,7 +44,7 @@ namespace WordCounterEndpoint
                     {
                         throw;
                     }
-                    Thread.Sleep(TimeSpan.FromSeconds(2).Milliseconds);
+                    Thread.Sleep((int)TimeSpan.FromSeconds(2).TotalMilliseconds);
                 }
             }
         }
