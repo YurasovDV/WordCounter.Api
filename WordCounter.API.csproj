@@ -5,6 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="WordCounter.Common\**" />
+    <EmbeddedResource Remove="WordCounter.Common\**" />
+    <None Remove="WordCounter.Common\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.2" />
@@ -13,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WordCounter.Common\WordCounter.Common.csproj" />
+    <ProjectReference Include="WordCounter.Common\WordCounter.Common.csproj" />
   </ItemGroup>
 
 </Project>
