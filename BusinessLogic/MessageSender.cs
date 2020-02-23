@@ -10,61 +10,46 @@ namespace WordCounterEndpoint
 {
     class MessageSender : IMessageSender, IDisposable
     {
-        private Lazy<IConnection> queueConnection = new Lazy<IConnection>(TryConnect, isThreadSafe: true);
+        private IConnection queueConnection;
         private bool _disposed;
+        private readonly IEnvironmentFacade _environment;
+        private readonly Connector _connector;
 
-        public ILogger<MessageSender> Logger { get; }
+        public static object _lock = new object();
 
-        public MessageSender(ILogger<MessageSender> logger)
+        private readonly ILogger<MessageSender> _logger;
+
+        public MessageSender(ILogger<MessageSender> logger, IEnvironmentFacade environment, Connector connector)
         {
-            Logger = logger;
-        }
-
-        private static IConnection TryConnect()
-        {
-            var _factory = new ConnectionFactory()
-            {
-                HostName = Environment.GetEnvironmentVariable(Constants.RabbitMqHost),
-                Port = int.Parse(Environment.GetEnvironmentVariable(Constants.RabbitMqPort)),
-                UserName = Environment.GetEnvironmentVariable(Constants.RabbitMqUser),
-                Password = Environment.GetEnvironmentVariable(Constants.RabbitMqPass),
-            };
-            int retriesLeft = 6;
-            while (true)
-            {
-                retriesLeft--;
-                try
-                {
-                    var connection = _factory.CreateConnection();
-                    return connection;
-                }
-                catch (Exception)
-                {
-                    if (retriesLeft == 0)
-                    {
-                        throw;
-                    }
-                    Thread.Sleep((int)TimeSpan.FromSeconds(2).TotalMilliseconds);
-                }
-            }
+            _logger = logger;
+            _environment = environment;
+            _connector = connector;
         }
 
         public void Send(BusinessMessage businessMessage)
         {
+            if (queueConnection == null)
+            {
+                lock (_lock)
+                {
+                    queueConnection = _connector.ConnectToQueue(_logger, _environment.BuildQueueSettings());
+                }
+            }
+
             try
             {
-                Logger.LogDebug($"MessageSender:Send: '{businessMessage.CorrelationId}'");
-                using (var channel = queueConnection.Value.CreateModel())
+                _logger.LogDebug($"MessageSender:Send: '{businessMessage.CorrelationId}'");
+                using (var channel = queueConnection.CreateModel())
                 {
                     channel.ExchangeDeclare(Constants.ArticlesExchange, ExchangeType.Fanout);
                     string message = JsonConvert.SerializeObject(businessMessage);
                     channel.BasicPublish(Constants.ArticlesExchange, Constants.RoutingKey, basicProperties:null, body:Encoding.UTF8.GetBytes(message));
-                    Logger.LogDebug($"MessageSender:Send: '{businessMessage.CorrelationId}': SUCCESS");
+                    _logger.LogDebug($"MessageSender:Send: '{businessMessage.CorrelationId}': SUCCESS");
                 }
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex.Message);
+                _logger.LogError(ex.Message);
                 throw;
             }
         }
@@ -73,16 +58,16 @@ namespace WordCounterEndpoint
         {
             if (!_disposed)
             {
-                if (queueConnection.IsValueCreated)
+                if (queueConnection != null)
                 {
-                    queueConnection.Value.Dispose();
+                    queueConnection.Dispose();
                 }
                 _disposed = true;
-                Logger.LogInformation("MessageSender disposed");
+                _logger.LogInformation("MessageSender disposed");
             }
             else
             {
-                Logger.LogWarning("MessageSender: second 'Dispose' call");
+                _logger.LogWarning("MessageSender: second 'Dispose' call");
             }
         }
     }
