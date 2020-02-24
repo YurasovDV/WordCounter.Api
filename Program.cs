@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
+using WordCounter.Common;
 
 namespace WordCounterEndpoint
 {
@@ -18,7 +19,9 @@ namespace WordCounterEndpoint
                 {
                     services.AddMvc();
                     services.AddRouting();
-                    services.AddSingleton(typeof(IMessageSender), typeof(MessageSender));
+                    services.AddSingleton<IMessageSender, MessageSender>();
+                    services.AddSingleton<IEnvironmentFacade, EnvironmentFacade>();
+                    services.AddSingleton<Connector, Connector>();
                 })
                 .ConfigureLogging(logging =>
                 {

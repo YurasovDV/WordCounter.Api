@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using System.Threading;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
@@ -10,7 +9,7 @@ namespace WordCounterEndpoint
 {
     class MessageSender : IMessageSender, IDisposable
     {
-        private IConnection queueConnection;
+        private volatile IConnection queueConnection;
         private bool _disposed;
         private readonly IEnvironmentFacade _environment;
         private readonly Connector _connector;
@@ -32,7 +31,10 @@ namespace WordCounterEndpoint
             {
                 lock (_lock)
                 {
-                    queueConnection = _connector.ConnectToQueue(_logger, _environment.BuildQueueSettings());
+                    if (queueConnection == null)
+                    {
+                        queueConnection = _connector.ConnectToQueue(_logger, _environment.BuildQueueSettings());
+                    }
                 }
             }
 

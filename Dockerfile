@@ -15,6 +15,13 @@ ENV RabbitMqHost rabbit_mq
 ENV RabbitMqPort 5672
 ENV RabbitMqUser admin
 ENV RabbitMqPass demo
+
+ENV DbHost db
+ENV DbPort 5432
+ENV DbUser admin
+ENV DbPass demo
+ENV Db counters
+
 ENV ASPNETCORE_URLS http://*:5000
 
 

@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Remove="WordCounter.Common\**" />
+    <Content Remove="WordCounter.Common\**" />
     <EmbeddedResource Remove="WordCounter.Common\**" />
     <None Remove="WordCounter.Common\**" />
   </ItemGroup>
@@ -20,6 +21,10 @@
 
   <ItemGroup>
     <ProjectReference Include="WordCounter.Common\WordCounter.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DAL\" />
   </ItemGroup>
 
 </Project>
