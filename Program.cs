@@ -24,6 +24,7 @@ namespace WordCounterEndpoint
                     services.AddSingleton<Connector, Connector>();
                     services.AddDbContext<CountResultsContext>();
                     services.AddTransient<IWordCountersRepository, WordCountersRepository>();
+                    services.AddTransient<ICounterRequestRepository, CounterRequestRepository>();
                     services.AddTransient<ICountersService, CountersService>();
                 })
                 .ConfigureLogging(logging =>
