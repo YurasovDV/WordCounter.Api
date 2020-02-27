@@ -68,13 +68,23 @@ namespace WordCounterEndpoint
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody]string article)
+        public IActionResult Post([FromBody]Dto dto)
         {
             try
             {
-                var msg = new BusinessMessage() { Content = article, CorrelationId = Guid.NewGuid() };
+                if (dto == null)
+                {
+                    throw new ArgumentNullException("dto");
+                }
 
-                _logger.LogInformation($"Post: created message {msg.CorrelationId}");
+                if (string.IsNullOrWhiteSpace(dto.Article))
+                {
+                    throw new ArgumentNullException("dto.Article");
+                }
+
+                var msg = new BusinessMessage() { Content = dto.Article, CorrelationId = Guid.NewGuid() };
+
+                _logger.LogInformation($"Post: created message {msg.CorrelationId} content='{msg.Content}'");
 
                 var id = _countersService.CreateRequest(new CountRequest() { Content = msg.Content, CorrelationId = msg.CorrelationId });
 
