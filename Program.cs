@@ -26,6 +26,7 @@ namespace WordCounterEndpoint
                     services.AddTransient<IWordCountersRepository, WordCountersRepository>();
                     services.AddTransient<ICounterRequestRepository, CounterRequestRepository>();
                     services.AddTransient<ICountersService, CountersService>();
+                    services.AddCors(opts => opts.AddPolicy("my-cors-policy", builder => { builder.AllowAnyOrigin().AllowAnyHeader(); }));
                 })
                 .ConfigureLogging(logging =>
                 {
@@ -34,6 +35,7 @@ namespace WordCounterEndpoint
                 }).Configure(app =>
                 {
                     app.UseRouting();
+                    app.UseCors("my-cors-policy");
                     app.UseEndpoints(endpoints =>
                     {
                         endpoints.MapControllers();
